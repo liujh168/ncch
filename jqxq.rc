@@ -1,0 +1,68 @@
+#include "resource.h"
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_APPICON             ICON    DISCARDABLE     "RES\\jqxq.ico"
+IDI_ICON1               ICON    DISCARDABLE     "RES\\cch.ico"
+
+IDC_CURSOR_HAND			CURSOR  DISCARDABLE     "RES\\hand.cur"
+
+// Bitmap
+IDB_BOARD               BITMAP  DISCARDABLE     "RES\\BOARD.BMP" 
+IDB_SELECTED            BITMAP  DISCARDABLE     "RES\\SELECTED.BMP"
+IDB_RK                  BITMAP  DISCARDABLE     "RES\\RK.BMP"
+IDB_RA                  BITMAP  DISCARDABLE     "RES\\RA.BMP"
+IDB_RB                  BITMAP  DISCARDABLE     "RES\\RB.BMP"
+IDB_RN                  BITMAP  DISCARDABLE     "RES\\RN.BMP"
+IDB_RR                  BITMAP  DISCARDABLE     "RES\\RR.BMP"
+IDB_RC                  BITMAP  DISCARDABLE     "RES\\RC.BMP"
+IDB_RP                  BITMAP  DISCARDABLE     "RES\\RP.BMP"
+IDB_BK                  BITMAP  DISCARDABLE     "RES\\bk.bmp"
+IDB_BA                  BITMAP  DISCARDABLE     "RES\\BA.BMP"
+IDB_BB                  BITMAP  DISCARDABLE     "RES\\BB.BMP"
+IDB_BN                  BITMAP  DISCARDABLE     "RES\\BN.BMP"
+IDB_BR                  BITMAP  DISCARDABLE     "RES\\BR.BMP"
+IDB_BC                  BITMAP  DISCARDABLE     "RES\\BC.BMP"
+IDB_BP                  BITMAP  DISCARDABLE     "RES\\BP.BMP"
+
+// WAVE
+IDR_CLICK               WAVE    DISCARDABLE     "RES\\CLICK.WAV"
+IDR_ILLEGAL             WAVE    DISCARDABLE     "RES\\ILLEGAL.WAV"
+IDR_MOVE                WAVE    DISCARDABLE     "RES\\MOVE.WAV"
+IDR_MOVE2               WAVE    DISCARDABLE     "RES\\MOVE2.WAV"
+IDR_CAPTURE             WAVE    DISCARDABLE     "RES\\CAPTURE.WAV"
+IDR_CAPTURE2            WAVE    DISCARDABLE     "RES\\CAPTURE2.WAV"
+IDR_CHECK               WAVE    DISCARDABLE     "RES\\CHECK.WAV"
+IDR_CHECK2              WAVE    DISCARDABLE     "RES\\CHECK2.WAV"
+IDR_WIN                 WAVE    DISCARDABLE     "RES\\WIN.WAV"
+IDR_DRAW                WAVE    DISCARDABLE     "RES\\DRAW.WAV"
+IDR_LOSS                WAVE    DISCARDABLE     "RES\\LOSS.WAV"
+
+// Data
+BOOK_DATA               RCDATA  DISCARDABLE     "BOOK.DAT"
+
+// Menu
+IDM_MAINMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "文件(&F)"
+    BEGIN
+        MENUITEM "保存方案(&S)",                  IDM_FILE_SAVE
+        MENUITEM "载入方案(&L)",                  IDM_FILE_LOAD
+        MENUITEM SEPARATOR
+        MENUITEM "退出(&X)",					  IDM_FILE_EXIT
+    END
+    POPUP "动作(&A)"
+    BEGIN
+        MENUITEM "我先走(&R)",                  IDM_FILE_RED
+        MENUITEM "电脑先走(&B)",                IDM_FILE_BLACK
+    END
+    POPUP "窗口(&W)"
+    BEGIN
+        MENUITEM "窗口置顶(&T)",                  IDM_WIN_TOP
+        MENUITEM "拷贝图形盘面到剪贴板(&C)",      IDM_WIN_CLIP
+    END
+    POPUP "帮助(&H)"
+    BEGIN
+        MENUITEM "关于(&A)",                    IDM_HELP_ABOUT
+    END
+END
