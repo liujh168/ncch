@@ -1,8 +1,9 @@
 #include <ctime>
 #include <windows.h>
-#include "positionstruct.h"
 
-PositionStruct pos;		// 局面实例
+#include "position.h"
+
+Position pos;		// 局面实例
 
 static ZOBRIST Zobrist;
 static SEARCH Search;
@@ -42,7 +43,7 @@ void RC4Struct::InitZero(void) {
 }
 
 // 初始化棋盘
-void PositionStruct::Startup(void) {
+void Position::Startup(void) {
 	InitZobrist();
 	int sq, pc;
 	ClearBoard();
@@ -56,7 +57,7 @@ void PositionStruct::Startup(void) {
 }
 
 // 搬一步棋的棋子
-int PositionStruct::MovePiece(int mv) {
+int Position::MovePiece(int mv) {
 	int sqSrc, sqDst, pc, pcCaptured;
 	sqSrc = SRC(mv);
 	sqDst = DST(mv);
@@ -71,7 +72,7 @@ int PositionStruct::MovePiece(int mv) {
 }
 
 // 撤消搬一步棋的棋子
-void PositionStruct::UndoMovePiece(int mv, int pcCaptured) {
+void Position::UndoMovePiece(int mv, int pcCaptured) {
 	int sqSrc, sqDst, pc;
 	sqSrc = SRC(mv);
 	sqDst = DST(mv);
@@ -84,7 +85,7 @@ void PositionStruct::UndoMovePiece(int mv, int pcCaptured) {
 }
 
 // 走一步棋
-BOOL PositionStruct::MakeMove(int mv) {
+BOOL Position::MakeMove(int mv) {
 	int pcCaptured;
 	DWORD dwKey;
 
@@ -102,7 +103,7 @@ BOOL PositionStruct::MakeMove(int mv) {
 }
 
 // 生成所有走法，如果"bCapture"为"TRUE"则只生成吃子走法
-int PositionStruct::GenerateMoves(int *mvs, BOOL bCapture) const {
+int Position::GenerateMoves(int *mvs, BOOL bCapture) const {
 	int i, j, nGenMoves, nDelta, sqSrc, sqDst;
 	int pcSelfSide, pcOppSide, pcSrc, pcDst;
 	// 生成所有走法，需要经过以下几个步骤：
@@ -259,7 +260,7 @@ int PositionStruct::GenerateMoves(int *mvs, BOOL bCapture) const {
 }
 
 // 判断走法是否合理
-BOOL PositionStruct::LegalMove(int mv) const {
+BOOL Position::LegalMove(int mv) const {
 	int sqSrc, sqDst, sqPin;
 	int pcSelfSide, pcSrc, pcDst, nDelta;
 	// 判断走法是否合法，需要经过以下的判断过程：
@@ -326,7 +327,7 @@ BOOL PositionStruct::LegalMove(int mv) const {
 }
 
 // 判断是否被将军
-BOOL PositionStruct::Checked() const {
+BOOL Position::Checked() const {
 	int i, j, sqSrc, sqDst;
 	int pcSelfSide, pcOppSide, pcDst, nDelta;
 	pcSelfSide = SIDE_TAG(sdPlayer);
@@ -393,7 +394,7 @@ BOOL PositionStruct::Checked() const {
 }
 
 // 判断是否被杀
-BOOL PositionStruct::IsMate(void) {
+BOOL Position::IsMate(void) {
 	int i, nGenMoveNum, pcCaptured;
 	int mvs[MAX_GEN_MOVES];
 
@@ -411,7 +412,7 @@ BOOL PositionStruct::IsMate(void) {
 }
 
 // 检测重复局面
-int PositionStruct::RepStatus(int nRecur) const {
+int Position::RepStatus(int nRecur) const {
 	BOOL bSelfSide, bPerpCheck, bOppPerpCheck;
 	const MoveStruct *lpmvs;
 
@@ -437,7 +438,7 @@ int PositionStruct::RepStatus(int nRecur) const {
 }
 
 // 对局面镜像
-void PositionStruct::Mirror(PositionStruct &posMirror) const {
+void Position::Mirror(Position &posMirror) const {
 	int sq, pc;
 	posMirror.ClearBoard();
 	for (sq = 0; sq < 256; sq ++) {
@@ -529,7 +530,7 @@ int SearchBook(void) {
 	int mvs[MAX_GEN_MOVES], vls[MAX_GEN_MOVES];
 	BOOL bMirror;
 	BookItem bkToSearch, *lpbk;
-	PositionStruct posMirror;
+	Position posMirror;
 	// 搜索开局库的过程有以下几个步骤
 
 	// 1. 如果没有开局库，则立即返回

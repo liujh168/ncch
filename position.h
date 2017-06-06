@@ -1,3 +1,6 @@
+#ifndef POSITIONSTRUCT_H_INCLUDED
+#define POSITIONSTRUCT_H_INCLUDED
+
 // 棋盘范围
 const int RANK_TOP = 3;
 const int RANK_BOTTOM = 12;
@@ -272,7 +275,7 @@ struct MoveStruct {
 }; // mvs
 
 // 局面结构
-struct PositionStruct {
+struct Position {
 	int sdPlayer;                   // 轮到谁走，0=红方，1=黑方
 	BYTE ucpcSquares[256];          // 棋盘上的棋子
 	int vlWhite, vlBlack;           // 红、黑双方的子力价值
@@ -365,10 +368,12 @@ struct PositionStruct {
 	BOOL NullOkay(void) const {                 // 判断是否允许空步裁剪
 		return (sdPlayer == 0 ? vlWhite : vlBlack) > NULL_MARGIN;
 	}
-	void Mirror(PositionStruct &posMirror) const; // 对局面镜像
+	void Mirror(Position &posMirror) const; // 对局面镜像
 };
 
 int 	SearchMain(void) ;
 void	LoadBook(HINSTANCE hInst);
 
-extern PositionStruct pos;		// 局面实例
+extern Position pos;		// 局面实例
+
+#endif
