@@ -1,2 +1,2 @@
-# ncch
-net chinese chess
+2017年6月5日
+用win32 sdk编程完成了基本的简易界面，首次提交
