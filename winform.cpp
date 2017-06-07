@@ -5,16 +5,19 @@
 #include "resource.h"
 
 const int MASK_COLOR = RGB(0, 0, 0);
-const int BOARD_EDGE = 8;		
-const int SQUARE_SIZE = 56;	//棋格大小，兵河54
+const int BOARD_EDGE = 8;		//
+const int TOOLBAR_SIZE = 41;		
+
+const int SQUARE_SIZE = 56;		//棋格大小，兵河56
 const int PIECE_SIZE  = 52;		//棋子大小，兵河52
+
 const int LBrook_LEFT = 55;		//棋盘左上角黑车位置X（相对棋盘图像），兵河55
 const int LBrook_TOP  = 70;		//棋盘左上角黑车位置Y（相对棋盘图像），兵河70
 
-const int BOARD_WIDTH = 560;// BOARD_EDGE + SQUARE_SIZE * 9 + BOARD_EDGE;
-const int BOARD_HEIGHT =645;// BOARD_EDGE + SQUARE_SIZE * 10 + BOARD_EDGE;
-const int ScreenOffX =   BOARD_EDGE + LBrook_LEFT -2;	//左边空白
-const int ScreenOffY =   BOARD_EDGE + LBrook_TOP + 41 -2;	//上边空白
+const int BOARD_WIDTH  = 560;
+const int BOARD_HEIGHT = 645;
+const int ScreenOffX =   BOARD_EDGE + LBrook_LEFT ;	//左边空白
+const int ScreenOffY =   BOARD_EDGE + LBrook_TOP + TOOLBAR_SIZE;	//上边空白
 
 // "DrawSquare"参数
 const bool DRAW_SELECTED = true;
@@ -26,18 +29,23 @@ static void DrawBoard1(HDC hdc);//画棋盘
 void DrawSquare(int sq, BOOL bSelected)
 {
 	int sqFlipped, xx, yy, pc;
-
 	sqFlipped = wforms.bFlipped ? SQUARE_FLIP(sq) : sq;
-	xx = BOARD_EDGE + LBrook_LEFT- PIECE_SIZE/2 +  (FILE_X(sqFlipped) - FILE_LEFT) * PIECE_SIZE;
-	yy = BOARD_EDGE  + LBrook_TOP + 41 - PIECE_SIZE/2 + (RANK_Y(sqFlipped) - RANK_TOP) * PIECE_SIZE;
-	SelectObject(wforms.hdcTmp, wforms.bmpBoard);
-	BitBlt(wforms.hdc, xx, yy, PIECE_SIZE, PIECE_SIZE, wforms.hdcTmp, xx, yy, SRCCOPY);
+	xx = LBrook_LEFT - SQUARE_SIZE/2+ (FILE_X(sqFlipped) - FILE_LEFT) * SQUARE_SIZE ;		//此时的X是相对是棋盘位图左上角的
+	yy = LBrook_TOP  - SQUARE_SIZE/2+ (RANK_Y(sqFlipped) - RANK_TOP) * SQUARE_SIZE  ;
+	SelectObject(wforms.hdcTmp, wforms.bmpBoard);   //位图选进兼容的设备内容时，左上角坐标是（0，0）注意转换！
+	//BitBlt(hdc, BOARD_EDGE, BOARD_EDGE + TOOLBAR_SIZE, BOARD_WIDTH, BOARD_HEIGHT, hdcTmp, 0, 0, SRCCOPY);   //绘制棋盘时的数据
+	BitBlt(wforms.hdc, BOARD_EDGE+xx, BOARD_EDGE+TOOLBAR_SIZE+yy, SQUARE_SIZE, SQUARE_SIZE, wforms.hdcTmp, xx, yy, SRCCOPY);			//恢复原棋盘该处图像
 	pc = pos.ucpcSquares[sq];
-	if (pc != 0) {
-		DrawTransBmp(wforms.hdc, wforms.hdcTmp, xx, yy, wforms.bmpPieces[pc]);
+
+	xx += BOARD_EDGE ;
+	yy += BOARD_EDGE + TOOLBAR_SIZE ;
+	if (pc != 0) 
+	{
+		DrawTransBmp(wforms.hdc, wforms.hdcTmp,xx, yy, wforms.bmpPieces[pc]);
 	}
-	if (bSelected) {
-		DrawTransBmp(wforms.hdc, wforms.hdcTmp, xx, yy, wforms.bmpSelected);
+	if (bSelected)
+	{
+		DrawTransBmp(wforms.hdc, wforms.hdcTmp,  xx, yy,  wforms.bmpSelected);
 	}
 }
 
@@ -49,19 +57,21 @@ void ClickSquare(int sq) {
 	sq = wforms.bFlipped ? SQUARE_FLIP(sq) : sq;
 	pc = pos.ucpcSquares[sq];
 
-	if ((pc & SIDE_TAG(pos.sdPlayer)) != 0) {
+	if ((pc & SIDE_TAG(pos.sdPlayer)) != 0)
+	{
 		// 如果点击自己的子，那么直接选中该子
-		if (wforms.sqSelected != 0) {
+		if (wforms.sqSelected != 0) 
+		{
 			DrawSquare(wforms.sqSelected);
 		}
 		wforms.sqSelected = sq;
 		DrawSquare(sq, DRAW_SELECTED);
-		if (wforms.mvLast != 0) {
+		if (wforms.mvLast != 0)
+		{
 			DrawSquare(SRC(wforms.mvLast));
 			DrawSquare(DST(wforms.mvLast));
 		}
 		PlayResWav(IDR_CLICK); // 播放点击的声音
-
 	} 
 	else if (wforms.sqSelected != 0 && !wforms.bGameOver)
 	{
@@ -142,7 +152,7 @@ void DrawBoard(HDC hdc) {
 	// 画棋盘
 	hdcTmp = CreateCompatibleDC(hdc);
 	SelectObject(hdcTmp, wforms.bmpBoard);
-	BitBlt(hdc, 6, 47, BOARD_WIDTH, BOARD_HEIGHT, hdcTmp, 0, 0, SRCCOPY);
+	BitBlt(hdc, BOARD_EDGE, BOARD_EDGE + TOOLBAR_SIZE, BOARD_WIDTH, BOARD_HEIGHT, hdcTmp, 0, 0, SRCCOPY);
 	DrawBoard1(hdc);
 
 	// 画棋子
@@ -151,12 +161,12 @@ void DrawBoard(HDC hdc) {
 			if (wforms.bFlipped) 
 			{
 				xx = BOARD_EDGE + LBrook_LEFT -	SQUARE_SIZE/2 +	(FILE_FLIP(x) - FILE_LEFT) * SQUARE_SIZE;
-				yy = BOARD_EDGE + LBrook_TOP + 41 - SQUARE_SIZE/2 + (RANK_FLIP(y) - RANK_TOP) * SQUARE_SIZE;
+				yy = BOARD_EDGE + LBrook_TOP + TOOLBAR_SIZE - SQUARE_SIZE/2 + (RANK_FLIP(y) - RANK_TOP) * SQUARE_SIZE;
 			} 
 			else 
 			{
 				xx = BOARD_EDGE + LBrook_LEFT- SQUARE_SIZE/2 +  (x - FILE_LEFT) * SQUARE_SIZE;
-				yy = BOARD_EDGE  + LBrook_TOP + 41 - SQUARE_SIZE/2 + (y - RANK_TOP) * SQUARE_SIZE;
+				yy = BOARD_EDGE  + LBrook_TOP + TOOLBAR_SIZE - SQUARE_SIZE/2 + (y - RANK_TOP) * SQUARE_SIZE;
 			}
 
 			sq = COORD_XY(x, y);
@@ -185,7 +195,7 @@ void DrawBoard1(HDC hdc)//画棋盘
 	//画横线
 	for( i=0;i<=9;i++)
 	{
-		DrawLine(hdc,ScreenOffX,ScreenOffY+SQUARE_SIZE*i,ScreenOffX+SQUARE_SIZE*8,ScreenOffY+SQUARE_SIZE*i);
+		DrawLine(hdc,ScreenOffX, ScreenOffY+SQUARE_SIZE*i, ScreenOffX+SQUARE_SIZE*8, ScreenOffY+SQUARE_SIZE*i);
 	}
 
 	TextOut(hdc, ScreenOffX*3, int(ScreenOffY+SQUARE_SIZE*4.3), buffer, sizeof(buffer)-1) ;//楚河汉界
@@ -271,26 +281,34 @@ void ResponseMove(void) {
 	DrawSquare(DST(wforms.mvLast), DRAW_SELECTED);
 	// 检查重复局面
 	vlRep = pos.RepStatus(3);
-	if (pos.IsMate()) {
+	if (pos.IsMate())
+	{
 		// 如果分出胜负，那么播放胜负的声音，并且弹出不带声音的提示框
 		PlayResWav(IDR_LOSS);
 		MessageBoxMute("请再接再厉！");
 		wforms.bGameOver = TRUE;
-	} else if (vlRep > 0) {
+	} 
+	else if (vlRep > 0) 
+	{
 		vlRep = pos.RepValue(vlRep);
 		// 注意："vlRep"是对玩家来说的分值
 		PlayResWav(vlRep < -WIN_VALUE ? IDR_LOSS : vlRep > WIN_VALUE ? IDR_WIN : IDR_DRAW);
 		MessageBoxMute(vlRep < -WIN_VALUE ? "长打作负，请不要气馁！" :
 			vlRep > WIN_VALUE ? "电脑长打作负，祝贺你取得胜利！" : "双方不变作和，辛苦了！");
 		wforms.bGameOver = TRUE;
-	} else if (pos.nMoveNum > 100) {
+	} 
+	else if (pos.nMoveNum > 100) 
+	{
 		PlayResWav(IDR_DRAW);
 		MessageBoxMute("超过自然限着作和，辛苦了！");
 		wforms.bGameOver = TRUE;
-	} else {
+	} 
+	else 
+	{
 		// 如果没有分出胜负，那么播放将军、吃子或一般走子的声音
 		PlayResWav(pos.InCheck() ? IDR_CHECK2 : pos.Captured() ? IDR_CAPTURE2 : IDR_MOVE2);
-		if (pos.Captured()) {
+		if (pos.Captured()) 
+		{
 			pos.SetIrrev();
 		}
 	}

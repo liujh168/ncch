@@ -7,8 +7,8 @@
 
 #include "resource.h"
 #include "winform.h"
-#include "link\toolsCV.h"
 #include "position.h"
+//#include "link\toolsCV.h"
 
 #pragma comment(lib,"comctl32.lib")  
 #pragma comment(lib, "WINMM.LIB")
@@ -20,68 +20,9 @@ const int WINDOW_STYLES = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEB
 extern Position pos;		// 局面实例
 WINFORMSTRUCT wforms;
 
-//void change_piece_size(char *path, char* dst);//批量变换兵河棋子图像大小
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) ;
+void change_piece_size(char *path, char* dst,int size);//批量变换兵河棋子图像大小
+//LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) ;
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-#ifdef _DEBUG
-	change_piece_size("E:\\兵河五四360\\兵河棋盘棋子\\棋子大全-素还真提供\\3D精致棋子(金边)", "G:\\link_vc2010_office\\RES\\",PIECE_SIZE);
-#endif
-	int i;
-	MSG msg;
-	WNDCLASSEX wce;
-
-	// 初始化全局变量
-	srand((DWORD) time(NULL));
-	//InitZobrist();
-	wforms.hInst = hInstance;
-	LoadBook(hInstance);
-	wforms.bFlipped = FALSE;
-	Startup();
-
-	// 装入图片
-	wforms.bmpBoard = LoadResBmp(IDB_BOARD);
-	wforms.bmpSelected = LoadResBmp(IDB_SELECTED);
-	for (i = PIECE_KING; i <= PIECE_PAWN; i ++) {
-		wforms.bmpPieces[SIDE_TAG(0) + i] = LoadResBmp(IDB_RK + i);
-		wforms.bmpPieces[SIDE_TAG(1) + i] = LoadResBmp(IDB_BK + i);
-	}
-
-	// 设置窗口
-	wce.cbSize = sizeof(WNDCLASSEX);
-	wce.style = 0;
-	wce.lpfnWndProc = (WNDPROC) WndProc;
-	wce.cbClsExtra = wce.cbWndExtra = 0;
-	wce.hInstance = hInstance;
-	wce.hIcon = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32, 32, LR_SHARED);
-	wce.hCursor = (HCURSOR) LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
-	wce.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
-	wce.lpszMenuName = MAKEINTRESOURCE(IDM_MAINMENU);
-	wce.lpszClassName = "JQXQ";
-	wce.hIconSm = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 16, 16, LR_SHARED);
-	RegisterClassEx(&wce);
-
-	// 打开窗口
-	wforms.hIcon = wce.hIcon;
-	//wforms.hCursor=  SetCursor(LoadCursor(wforms.hInst, MAKEINTRESOURCE(IDC_CURSOR_HAND)));
-	//wforms.hCursor = LoadCursorFromFile("hand.cur");
-	wforms.hCursor = LoadResCur(IDC_CURSOR_HAND);
-
-	wforms.hWnd = CreateWindow("JQXQ", "橘趣象棋", WINDOW_STYLES,
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
-	if (wforms.hWnd == NULL) {
-		return 0;
-	}
-	ShowWindow(wforms.hWnd, nCmdShow);
-	UpdateWindow(wforms.hWnd);
-
-	// 接收消息
-	while (GetMessage(&msg, NULL, 0, 0)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg); 
-	}
-	return msg.wParam;
-}
 
 // 窗体事件捕捉过程
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
@@ -154,7 +95,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         hWndTool=CreateWindowEx(0,TOOLBARCLASSNAME,NULL,WS_CHILD|WS_VISIBLE|TBSTYLE_TOOLTIPS,0,0,0,0,hWnd,(HMENU)1111, wforms.hInst,NULL);  
         SendMessage(hWndTool,TB_BUTTONSTRUCTSIZE,(WPARAM)sizeof(TBBUTTON),0);  
-        tbab.hInst=HINST_COMMCTRL;  
+
+		tbab.hInst=HINST_COMMCTRL;  
         tbab.nID=IDB_STD_SMALL_COLOR;  
         if(SendMessage(hWndTool,TB_ADDBITMAP,1,(LPARAM)&tbab)==-1)  
             MessageBox(hWnd,TEXT("失败"),TEXT("创建"),0);  
@@ -236,7 +178,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		x = rect.left;
 		y = rect.top;
 		rect.right = rect.left + BOARD_WIDTH + BOARD_EDGE + 135;
-		rect.bottom = rect.top + 41 + BOARD_HEIGHT + BOARD_EDGE*5;
+		rect.bottom = rect.top + TOOLBAR_SIZE + BOARD_HEIGHT + BOARD_EDGE*5;
 		AdjustWindowRect(&rect, WINDOW_STYLES, TRUE);
 		MoveWindow(hWnd, x, y, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 		break;
@@ -344,45 +286,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		// 绘图
 	case WM_PAINT:
 		hdc = BeginPaint(wforms.hWnd, &ps);
-
+		
 		DrawBoard(hdc);
 		//DrawText (hdc, TEXT ("Hello, Windows 98!"), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER) ;
 
 		//以下新加/////////////////////////////////////
-		//   hbitmap = LoadImage(NULL,"..\\res\\rp.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE);  
-		//
-		//	hdcmem = CreateCompatibleDC(hdc);  
+		//hbitmap = LoadImage(NULL,"..\\res\\rp.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE);  
+		//Hdcmem = CreateCompatibleDC(hdc);  
 		//hbmp= LoadResBmp(IDB_RP);
 		//DrawTransBmp(wforms.hdc, hdcmem, 33, 33,hbmp);
 		//DrawTransBmp(wforms.hdc, hdcmem, 0, 0, (HBITMAP)hbitmap);
-
-		//GetObject(hbitmap,sizeof(BITMAP),&bmap);  
-		//   SelectObject(hdcmem,hbitmap);  
-		//   BitBlt(hdc,11,11,bmap.bmWidth,bmap.bmHeight,hdcmem,0,0,SRCCOPY); 
-
-		//DeleteDC(hdcmem); 
-		//DeleteObject(hbitmap); 
-		////////////////////////////////////////////////////////////
-		//Rectangle (hdc, cxClient/8, cyClient/8, 7*cxClient/8, 7*cyClient/8) ;
-		//MoveToEx  (hdc,  0,  0, NULL) ;			LineTo(hdc, cxClient, cyClient) ;
-		//MoveToEx  (hdc,  0, cyClient, NULL) ;	LineTo(hdc, cxClient,  0) ;
-		//Ellipse   (hdc, cxClient/8, cyClient/8, 7*cxClient/8, 7*cyClient/8) ;
-		//RoundRect (hdc, cxClient/4, cyClient/4, 3*cxClient/4, 3*cyClient/4, cxClient/4, cyClient/4 ) ;
 
 		EndPaint(wforms.hWnd, &ps);
 		break;
 		// 鼠标点击
 	case WM_LBUTTONDOWN:
-		x = FILE_LEFT + (LOWORD(lParam) - (BOARD_EDGE + LBrook_LEFT )) / SQUARE_SIZE;
-		y = RANK_TOP + (HIWORD(lParam) - (BOARD_EDGE  + LBrook_TOP + 41 )) / SQUARE_SIZE;
+		x = FILE_LEFT + (LOWORD(lParam) - (BOARD_EDGE + LBrook_LEFT - SQUARE_SIZE/2 )) / SQUARE_SIZE;
+		y = RANK_TOP + (HIWORD(lParam) - (BOARD_EDGE  + LBrook_TOP + TOOLBAR_SIZE - SQUARE_SIZE/2)) / SQUARE_SIZE;
 		if (x >= FILE_LEFT && x <= FILE_RIGHT && y >= RANK_TOP && y <= RANK_BOTTOM) 
 		{
 			ClickSquare(COORD_XY(x, y));
 			SetCapture(wforms.hWnd);
 			SetCursor(wforms.hCursor);
 		}
-
 		break;
+
 	case    WM_MOUSEMOVE:  
         wsprintf(szBuf,"Mouse position:%d,%d",LOWORD(lParam),HIWORD(lParam));  
         SendMessage(hWndStatus,SB_SETTEXT,0,(LPARAM)(LPSTR)szBuf);  
@@ -395,4 +323,66 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 	return FALSE;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) 
+{
+#ifdef _DEBUG
+	//change_piece_size("E:\\private\\兵河五四3.6\\兵河棋盘棋子\\棋子大全-素还真提供\\3D精致棋子(金边)", "C:\\deleted\\link_vc2010\\RES\\",PIECE_SIZE );
+	//change_piece_size("E:\\兵河五四360\\兵河棋盘棋子\\棋子大全-素还真提供\\3D精致棋子(金边)", "G:\\link_vc2010_office\\RES\\",PIECE_SIZE);		//home
+#endif
+	int i;
+	MSG msg;
+	WNDCLASSEX wce;
+
+	// 初始化全局变量
+	srand((DWORD) time(NULL));
+	//InitZobrist();
+	wforms.hInst = hInstance;
+	LoadBook(hInstance);
+	wforms.bFlipped = FALSE;
+	Startup();
+
+	// 装入图片
+	wforms.bmpBoard = LoadResBmp(IDB_BOARD);
+	wforms.bmpSelected = LoadResBmp(IDB_SELECTED);
+	for (i = PIECE_KING; i <= PIECE_PAWN; i ++) {
+		wforms.bmpPieces[SIDE_TAG(0) + i] = LoadResBmp(IDB_RK + i);
+		wforms.bmpPieces[SIDE_TAG(1) + i] = LoadResBmp(IDB_BK + i);
+	}
+
+	// 设置窗口
+	wce.cbSize = sizeof(WNDCLASSEX);
+	wce.style = 0;
+	wce.lpfnWndProc = (WNDPROC) WndProc;
+	wce.cbClsExtra = wce.cbWndExtra = 0;
+	wce.hInstance = hInstance;
+	wce.hIcon = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32, 32, LR_SHARED);
+	wce.hCursor = (HCURSOR) LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
+	wce.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
+	wce.lpszMenuName = MAKEINTRESOURCE(IDM_MAINMENU);
+	wce.lpszClassName = "JQXQ";
+	wce.hIconSm = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 16, 16, LR_SHARED);
+	RegisterClassEx(&wce);
+
+	// 打开窗口
+	wforms.hIcon = wce.hIcon;
+	//wforms.hCursor=  SetCursor(LoadCursor(wforms.hInst, MAKEINTRESOURCE(IDC_CURSOR_HAND)));
+	//wforms.hCursor = LoadCursorFromFile("hand.cur");
+	wforms.hCursor = LoadResCur(IDC_CURSOR_HAND);
+
+	wforms.hWnd = CreateWindow("JQXQ", "橘趣象棋", WINDOW_STYLES,
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+	if (wforms.hWnd == NULL) {
+		return 0;
+	}
+	ShowWindow(wforms.hWnd, nCmdShow);
+	UpdateWindow(wforms.hWnd);
+
+	// 接收消息
+	while (GetMessage(&msg, NULL, 0, 0)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg); 
+	}
+	return msg.wParam;
 }

@@ -8,6 +8,7 @@ extern const int LBrook_LEFT;		//棋盘左上角黑车位置X（相对棋盘图像），兵河55
 extern const int LBrook_TOP;		//棋盘左上角黑车位置Y（相对棋盘图像），兵河70
 
 extern const int BOARD_EDGE;
+extern const int TOOLBAR_SIZE;
 extern const int BOARD_WIDTH;
 extern const int BOARD_HEIGHT;
 extern const bool DRAW_SELECTED;
