@@ -184,27 +184,78 @@ void DrawBoard(HDC hdc) {
 	}
 	DeleteDC(hdcTmp);
 }
+void DrawFlag(HDC hdc, POINT pt)
+{
+	////画炮位
+	int len=12;
+	int blank=6;
+
+	if(pt.x!=0)
+	{
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x-len-blank, ScreenOffY+SQUARE_SIZE*pt.y-blank, ScreenOffX+SQUARE_SIZE*pt.x-blank, ScreenOffY+SQUARE_SIZE*pt.y-blank);//左上横线
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x-len-blank, ScreenOffY+SQUARE_SIZE*pt.y+blank, ScreenOffX+SQUARE_SIZE*pt.x-blank, ScreenOffY+SQUARE_SIZE*pt.y+blank);//左下横线
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x-blank, ScreenOffY+SQUARE_SIZE*pt.y-len-blank, ScreenOffX+SQUARE_SIZE*pt.x-blank, ScreenOffY+SQUARE_SIZE*pt.y-blank);//左上竖线
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x-blank, ScreenOffY+SQUARE_SIZE*pt.y+blank, ScreenOffX+SQUARE_SIZE*pt.x-blank, ScreenOffY+SQUARE_SIZE*pt.y+blank+len);//左下竖线
+	}
+	if(pt.x!=8)
+	{
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x+blank, ScreenOffY+SQUARE_SIZE*pt.y-blank, ScreenOffX+SQUARE_SIZE*pt.x+blank+len, ScreenOffY+SQUARE_SIZE*pt.y-blank);//右上横线
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x+blank, ScreenOffY+SQUARE_SIZE*pt.y+blank, ScreenOffX+SQUARE_SIZE*pt.x+blank+len, ScreenOffY+SQUARE_SIZE*pt.y+blank);//右下横线
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x+blank, ScreenOffY+SQUARE_SIZE*pt.y-blank, ScreenOffX+SQUARE_SIZE*pt.x+blank, ScreenOffY+SQUARE_SIZE*pt.y-len-blank);//右上竖线
+		DrawLine(hdc,ScreenOffX+SQUARE_SIZE*pt.x+blank, ScreenOffY+SQUARE_SIZE*pt.y+blank, ScreenOffX+SQUARE_SIZE*pt.x+blank, ScreenOffY+SQUARE_SIZE*pt.y+len+blank);//右下竖线
+	}
+}
 
 void DrawBoard1(HDC hdc)//画棋盘
 {
-	char buffer[]="楚       河              汉      界";
+	char buffer[]="楚  河        汉  界";
 	char numberB[9][3]={"1","2","3","4","5","6","7","8","9"};
 	char numberR[9][3]={"一","二","三","四","五","六","七","八","九"};
 	int i;
-	
+	TEXTMETRIC tm;
+	HFONT hFont;
+
+	GetTextMetrics(hdc, &tm);    //获取系统当前字体
+	hFont=CreateFont
+		(
+		30,0,//高度20,宽取0表示由系统选择最佳值
+		0,0,//文本倾斜，与字体倾斜都为0
+		FW_HEAVY,//粗体
+		0,0,0,//非斜体，无下划线，无中划线
+		GB2312_CHARSET,//字符集
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY,//一系列的默认值
+		DEFAULT_PITCH|FF_DONTCARE,
+		"自定义字体"//字体名称
+		);
+
+	HGDIOBJ hFontOld= SelectObject(hdc,hFont);
+	SetTextColor(hdc,RGB(255,0,0));//文本为红色
+	SetBkMode(hdc, TRANSPARENT);
+
+	TextOut(hdc, ScreenOffX*2, int(ScreenOffY+SQUARE_SIZE*4.3), buffer, sizeof(buffer)-1) ;//楚河汉界
+
+	SelectObject(hdc,hFontOld);
+	DeleteObject(hFont);
+
+	SetTextColor(hdc,RGB(0,0,0));//文本为黑色
+
+	HPEN hPen = CreatePen(4, 1, RGB(0, 0, 255));			//PS_DASH
+	HGDIOBJ hOldPen = SelectObject(hdc,hPen);				//设置当前设备的画笔.
+
 	//画横线
 	for( i=0;i<=9;i++)
 	{
 		DrawLine(hdc,ScreenOffX, ScreenOffY+SQUARE_SIZE*i, ScreenOffX+SQUARE_SIZE*8, ScreenOffY+SQUARE_SIZE*i);
 	}
 
-	TextOut(hdc, ScreenOffX*3, int(ScreenOffY+SQUARE_SIZE*4.3), buffer, sizeof(buffer)-1) ;//楚河汉界
-
 	//画竖线
 	for( i=0;i<=8;i++)
 	{
+
 		TextOut(hdc, ScreenOffX+SQUARE_SIZE*i, ScreenOffY+SQUARE_SIZE*0-SQUARE_SIZE, numberB[i], sizeof(numberB[i])-2) ;//黑方标记
-		TextOut(hdc, ScreenOffX+SQUARE_SIZE*i, int(ScreenOffY+SQUARE_SIZE*9+SQUARE_SIZE*0.7), numberR[i], sizeof(numberR[i])-1) ;//红方标记
+		TextOut(hdc, ScreenOffX+SQUARE_SIZE*i, int(ScreenOffY+SQUARE_SIZE*9+SQUARE_SIZE*0.7), numberR[8-i], sizeof(numberR[i])-1) ;//红方标记
 
 		if(i==0||i==8)
 		{
@@ -216,30 +267,33 @@ void DrawBoard1(HDC hdc)//画棋盘
 			DrawLine(hdc,ScreenOffX+SQUARE_SIZE*i,ScreenOffY+SQUARE_SIZE*5,ScreenOffX+SQUARE_SIZE*i,ScreenOffY+SQUARE_SIZE*9);
 		}
 	}
-
+	
 	////画九宫格
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*2);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*7,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*9);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*2,ScreenOffX+SQUARE_SIZE*5,ScreenOffY);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*9,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*7);
+	DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*2);
+	DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*7,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*9);
+	DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*2,ScreenOffX+SQUARE_SIZE*5,ScreenOffY);
+	DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*9,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*7);
 
 	////画炮位
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*2);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*7,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*9);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*2,ScreenOffX+SQUARE_SIZE*5,ScreenOffY);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*9,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*7);
-	//
-	////画兵位
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*2);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*7,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*9);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*2,ScreenOffX+SQUARE_SIZE*5,ScreenOffY);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*9,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*7);
+	POINT pt[14]={ {1,2},{7,2},{1,7},{7,7},  {0,3},{2,3},{4,3},{6,3},{8,3},{0,6},{2,6},{4,6},{6,6},{8,6} };
+	for(int i=0; i<14; i++)
+	{
+		DrawFlag(hdc,pt[i]);
+	}
 
+	DeleteObject(hPen);				//删除创建的画笔.
+
+	hPen = CreatePen(4, 2, RGB(0, 0, 255));			//PS_DASH
+	SelectObject(hdc,hPen);				//设置当前设备的画笔.
+	int THREE = 5;	//宽度
 	////画外边粗的方框
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*2);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*7,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*9);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*2,ScreenOffX+SQUARE_SIZE*5,ScreenOffY);
-	//DrawLine(hdc,ScreenOffX+SQUARE_SIZE*3,ScreenOffY+SQUARE_SIZE*9,ScreenOffX+SQUARE_SIZE*5,ScreenOffY+SQUARE_SIZE*7);
+	DrawLine(hdc,ScreenOffX-THREE,ScreenOffY-THREE,ScreenOffX+SQUARE_SIZE*8+THREE,ScreenOffY-THREE);
+	DrawLine(hdc,ScreenOffX-THREE,ScreenOffY+SQUARE_SIZE*9+THREE,ScreenOffX+SQUARE_SIZE*8+THREE,ScreenOffY+SQUARE_SIZE*9+THREE);
+	DrawLine(hdc,ScreenOffX-THREE,ScreenOffY-THREE,ScreenOffX-THREE,ScreenOffY+SQUARE_SIZE*9+THREE);
+	DrawLine(hdc,ScreenOffX+SQUARE_SIZE*8+THREE,ScreenOffY-THREE,ScreenOffX+SQUARE_SIZE*8+THREE, ScreenOffY+SQUARE_SIZE*9+THREE);
+
+	SelectObject(hdc,hOldPen);		//恢复原来的画笔.
+	DeleteObject(hPen);				//删除创建的画笔.
 }
 
 

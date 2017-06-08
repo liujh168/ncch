@@ -45,9 +45,9 @@
 #define IDC_CURSOR_HAND 500
 
 #define BTN  1  
-#define IDC_MAIN_TOOL 1111  
-#define ID_FILE_NEW  1200  
-#define ID_FILE_OPEN 1201  
+#define IDC_MAIN_TOOL  1111  
+#define ID_FILE_NEW    1200  
+#define ID_FILE_OPEN   1201  
 #define ID_FILE_SAVEAS 1202  
 
 #endif

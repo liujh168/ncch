@@ -1,3 +1,9 @@
+# VC project file 
+*.opensdf
+*.sdf
+ipch
+debug
+
 # Compiled Object files
 *.slo
 *.lo

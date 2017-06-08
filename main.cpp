@@ -37,11 +37,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		BS_PUSHBUTTON,      TEXT ("取消连接"),
 		BS_DEFPUSHBUTTON,   TEXT ("换棋盘"),
 		BS_DEFPUSHBUTTON,   TEXT ("换棋子"),
-		BS_AUTOCHECKBOX,    TEXT ("电脑执红"),
-		BS_AUTOCHECKBOX,    TEXT ("电脑执黑"),
-		BS_AUTO3STATE,      TEXT ("引擎"),
+		BS_AUTOCHECKBOX,    TEXT ("开局库"),
+		BS_AUTOCHECKBOX,    TEXT ("云库"),
+		//BS_AUTO3STATE,      TEXT ("引擎"),
 		BS_AUTORADIOBUTTON, TEXT ("红先"),
-		//BS_AUTORADIOBUTTON, TEXT ("黑先"),
+		BS_AUTORADIOBUTTON, TEXT ("黑先"),
 		//BS_CHECKBOX,        TEXT ("CHECKBOX"), 
 		//BS_RADIOBUTTON,     TEXT ("RADIOBUTTON"),
 		//BS_3STATE,          TEXT ("3STATE"),
@@ -55,29 +55,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static int  cxClient, cyClient ;
 	static HPEN hpen, holbpen;
 
-	static HFONT hFont;  //逻辑字体
-	static HWND hLabUsername;  //静态文本框--用户名
-	static HWND hLabPassword;  //静态文本框--密码
+	static HFONT hFont;			//逻辑字体
+	static HWND hLabUsername;	//静态文本框--用户名
+	static HWND hLabPassword;	 //静态文本框--密码
 	static HWND hEditUsername;  //单行文本输入框
 	static HWND hEditPassword;  //密码输入框
-	static HWND hBtnLogin;  //登录按钮
+	static HWND hBtnLogin;		//登录按钮
 	static char buffer[255]="this is string!";
 	static RECT rect;
 
     TCHAR   ButtonName[]=TEXT("按钮");  
     static  HWND  hWndStatus,hWndTool;  
     TCHAR   szBuf[MAX_PATH];  
-    int nCount=3;  
-    int array[3]={250,500,-1};  
+    int nCount = 2;  
+    int array[2]={150,-1};  
     static TBBUTTON tbb[3];  
     static TBADDBITMAP tbab;  
     //LPNMHDR lpnmhdr;  
     //LPTOOLTIPTEXT lpttext;  
 
 	//定义缓冲区
-	TCHAR szUsername[100];
-	TCHAR szPassword[100];
-	TCHAR szUserInfo[200];
+//	TCHAR szUsername[100];
+//	TCHAR szPassword[100];
+//	TCHAR szUserInfo[200];
 	HDC hdc;
 	PAINTSTRUCT ps;
 	int x, y;
@@ -85,14 +85,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg) {
 		// 新建窗口
 	case WM_CREATE:
-		//toolbar and statusbar
+		//statusbar
 		hWndStatus=CreateWindowEx(0,STATUSCLASSNAME,"",WS_CHILD|WS_BORDER|WS_VISIBLE,-100,-100,10,10,hWnd,(HMENU)100,wforms.hInst,NULL);  
         if(!hWndStatus)  
             MessageBox(hWnd,TEXT("can't create statusbar!"),TEXT("error_notify"),MB_OK);  
         SendMessage(hWndStatus,SB_SETPARTS,(WPARAM)nCount,(LPARAM)array);  
-        SendMessage(hWndStatus,SB_SETTEXT,(LPARAM)1,(WPARAM)TEXT("fen串 bestmove"));  
-        SendMessage(hWndStatus,SB_SETTEXT,(LPARAM)2,(WPARAM)TEXT("info message value"));  
-
+        SendMessage(hWndStatus,SB_SETTEXT,(LPARAM)1,(WPARAM)TEXT("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"));  
+        SendMessage(hWndStatus,SB_SETTEXT,(LPARAM)2,(WPARAM)TEXT("info message bestmove"));  
+		
+		//toolbar
         hWndTool=CreateWindowEx(0,TOOLBARCLASSNAME,NULL,WS_CHILD|WS_VISIBLE|TBSTYLE_TOOLTIPS,0,0,0,0,hWnd,(HMENU)1111, wforms.hInst,NULL);  
         SendMessage(hWndTool,TB_BUTTONSTRUCTSIZE,(WPARAM)sizeof(TBBUTTON),0);  
 
@@ -122,56 +123,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		cxChar = LOWORD (GetDialogBaseUnits ()) ;
 		cyChar = HIWORD (GetDialogBaseUnits ()) ;
-		//创建逻辑字体
-		hFont = CreateFont(-14/*高*/, -7/*宽*/, 0, 0, 400 /*一般这个值设为400*/,
-			FALSE/*斜体?*/, FALSE/*下划线?*/, FALSE/*删除线?*/,DEFAULT_CHARSET,
-			OUT_CHARACTER_PRECIS, CLIP_CHARACTER_PRECIS, DEFAULT_QUALITY,
-			FF_DONTCARE, TEXT("微软雅黑")
-			);
 
-		//创建静态文本框控件--用户名
-		hLabUsername = CreateWindow(TEXT("static"), TEXT("用户名："),
-			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE /*垂直居中*/ | SS_RIGHT /*水平居右*/,
-			cxChar+BOARD_WIDTH /*x坐标*/, cyChar * (1 + 2 * 10) /*y坐标*/, 70 /*宽度*/, 26 /*高度*/,
-			hWnd /*父窗口句柄*/, (HMENU)1 /*控件ID*/, wforms.hInst /*当前程序实例句柄*/, NULL	);
-
-		//创建单行文本框控件
-		hEditUsername = CreateWindow(TEXT("edit"), TEXT(""),
-			WS_CHILD | WS_VISIBLE | WS_BORDER /*边框*/ | ES_AUTOHSCROLL /*水平滚动*/,
-			cxChar+BOARD_WIDTH /*x坐标*/, cyChar * (1 + 2 * 11) /*y坐标*/, 100, 26,
-			hWnd, (HMENU)3,  wforms.hInst, NULL
-			);
-		//创建静态文本框控件--密码
-		hLabPassword = CreateWindow(TEXT("static"), TEXT("密码："),
-			WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE /*垂直居中*/ | SS_RIGHT /*水平居右*/,
-			cxChar+BOARD_WIDTH /*x坐标*/, cyChar * (1 + 2 * 12) /*y坐标*/, 70, 26,
-			hWnd, (HMENU)2,  wforms.hInst, NULL);
-
-		//创建密码输入框
-		hEditPassword = CreateWindow(TEXT("edit"), TEXT(""),
-			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_PASSWORD /*密码*/ | ES_AUTOHSCROLL /*水平滚动*/,
-			cxChar+BOARD_WIDTH /*x坐标*/, cyChar * (1 + 2 * 13) /*y坐标*/, 100, 26,
-			hWnd, (HMENU)4,  wforms.hInst, NULL
-			);
-		//创建按钮控件
-		hBtnLogin = CreateWindow(TEXT("button"), TEXT("登录"),
-			WS_CHILD | WS_VISIBLE | WS_BORDER | BS_FLAT/*扁平样式*/,
-			cxChar+BOARD_WIDTH /*x坐标*/, cyChar * (1 + 2 * 14)/*y坐标*/,60, 30,
-			hWnd, (HMENU)5,  wforms.hInst, NULL
-			);
-		//依次设置控件的字体
-		SendMessage(hLabUsername, WM_SETFONT, (WPARAM)hFont, NULL);
-		SendMessage(hLabPassword, WM_SETFONT, (WPARAM)hFont, NULL);
-		SendMessage(hEditUsername, WM_SETFONT, (WPARAM)hFont, NULL);
-		SendMessage(hEditPassword, WM_SETFONT, (WPARAM)hFont, NULL);
-		SendMessage(hBtnLogin, WM_SETFONT, (WPARAM)hFont, NULL);
-
-
-		//生成按钮等子控件
+    	//生成按钮等子控件
 		for (int i = 0 ; i < NUMOFBUTTON ; i++)
 			hwndButton[i] = CreateWindow ( TEXT("button"), button[i].szText, WS_CHILD | WS_VISIBLE | button[i].iStyle, 
 				cxChar + BOARD_WIDTH + BOARD_EDGE, cyChar * (1 + 2 * i) + LBrook_TOP, 15 * cxChar, 7*cyChar/4, 
 				hWnd, (HMENU) i, ((LPCREATESTRUCT) lParam)->hInstance, NULL) ;
+
+		//创建静态文本框控件
+		hLabUsername = CreateWindow(TEXT("static"), TEXT("窗口标题名："), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE /*垂直居中*/ |SS_RIGHT /*水平居右*/, cxChar+BOARD_WIDTH+ BOARD_EDGE /*x坐标*/, cyChar * (1 + 2 * 11) /*y坐标*/, 100/*宽度*/, 26 /*高度*/, hWnd /*父窗口句柄*/, (HMENU)1 /*控件ID*/, wforms.hInst /*当前程序实例句柄*/, NULL	);
+
+		//创建单行文本框控件
+		hEditUsername = CreateWindow(TEXT("edit"), TEXT(""), WS_CHILD | WS_VISIBLE | WS_BORDER /*边框*/ | ES_AUTOHSCROLL /*水平滚动*/, cxChar+BOARD_WIDTH+ BOARD_EDGE /*x坐标*/, cyChar * (1 + 2 * 12) /*y坐标*/, 100, 26,	hWnd, (HMENU)3,  wforms.hInst, NULL	);
+
 
 		// 调整窗口位置和尺寸
 		GetWindowRect(hWnd, &rect);
@@ -216,13 +180,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			MessageBox(wforms.hWnd,TEXT("notify"),TEXT("file save as"),0);  
 			break;  
 
-		case 5:
-			//获取输入框的数据
-			GetWindowText(hEditUsername, szUsername, 100);
-			GetWindowText(hEditPassword, szPassword, 100);
-			wsprintf(szUserInfo, TEXT("您的用户账号：%s\r\n您的用户密码：%s"), szUsername, szPassword);
-			MessageBox(hWnd, szUserInfo, TEXT("信息提示"), MB_ICONINFORMATION);
-			break;
+		//case 5:
+		//	//获取输入框的数据
+		//	GetWindowText(hEditUsername, szUsername, 100);
+		//	GetWindowText(hEditPassword, szPassword, 100);
+		//	wsprintf(szUserInfo, TEXT("您的用户账号：%s\r\n您的用户密码：%s"), szUsername, szPassword);
+		//	MessageBox(hWnd, szUserInfo, TEXT("信息提示"), MB_ICONINFORMATION);
+		//	break;
 		case BS_PUSHBUTTON:
 			strcpy_s(buffer, "BS_PUSHBUTTON");
 			rect.left   = 0 ;
@@ -312,7 +276,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case    WM_MOUSEMOVE:  
-        wsprintf(szBuf,"Mouse position:%d,%d",LOWORD(lParam),HIWORD(lParam));  
+        wsprintf(szBuf,"Mouse %d,%d",LOWORD(lParam),HIWORD(lParam));  
         SendMessage(hWndStatus,SB_SETTEXT,0,(LPARAM)(LPSTR)szBuf);  
         break;  
 	case WM_LBUTTONUP:
